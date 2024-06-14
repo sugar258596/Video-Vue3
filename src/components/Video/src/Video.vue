@@ -9,8 +9,12 @@ import { ref, shallowRef, onMounted } from 'vue'
 import mp4Url from '../../../assets/IronMan.mp4';
 import OIP from '../../../assets/OIP.jpg'
 import Videojs from 'video.js';
-
+import zhCN from 'video.js/dist/lang/zh-CN.json';
 import { TouchOverlay } from './TouchOverlay'
+
+
+Videojs.addLanguage('zh-CN', zhCN);
+
 defineOptions({
   name: 'Basievideo'
 })
@@ -39,17 +43,19 @@ const potions = {
     children: [
       { name: 'PlayToggle' }, // 播放/暂停按钮
       { name: 'ProgressControl' }, // 播放进度条
-      // { name: 'currentTimeDisplay' }, // 当前播放时间
-      // { name: 'timeDivider' }, // 分隔符
-      // { name: 'DurationDisplay' }, // 视频总时间
-      // { name: 'PlaybackRateMenuButton' }, // 倍数按钮
-      // { name: 'VolumePanel', inline: false, }, // 音量按钮
-      // { name: 'PictureInPictureToggle' }, // 小窗按钮
+      { name: 'currentTimeDisplay' }, // 当前播放时间
+      { name: 'timeDivider' }, // 分隔符
+      { name: 'DurationDisplay' }, // 视频总时间
+      { name: 'PlaybackRateMenuButton' }, // 倍数按钮
+      { name: 'VolumePanel', inline: false, }, // 音量按钮
+      { name: 'PictureInPictureToggle' }, // 小窗按钮
       { name: 'FullscreenToggle' }, // 全屏按钮
     ]
   },
 
 };
+
+
 
 onMounted(() => {
   initVideo();
