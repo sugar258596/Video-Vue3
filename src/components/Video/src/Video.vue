@@ -194,16 +194,20 @@ const getComponent = () => {
     }
 
     .vjs-touch-overlay {
+      position: absolute;
+      left: 0;
+      top: 0;
       display: flex;
       justify-content: center;
       align-items: center;
-      position: absolute;
       width: 100%;
       height: 100%;
-      /* 关键点 */
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      cursor: pointer;
       pointer-events: none;
-      left: 0;
-      top: 0;
     }
 
     &.vjs-has-started .vjs-touch-overlay {
@@ -214,8 +218,6 @@ const getComponent = () => {
       display: none;
       justify-content: center;
       align-items: center;
-      height: 100px;
-      width: 100px;
       margin: auto;
       padding: 10px 15px;
       border-radius: 2px;

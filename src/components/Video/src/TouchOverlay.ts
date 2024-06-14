@@ -20,9 +20,16 @@ export class TouchOverlay extends Component {
     this.handleTouchstart = this.handleTouchstart.bind(this);
     this.handleTouchmove = this.handleTouchmove.bind(this);
     this.handleTouchend = this.handleTouchend.bind(this);
+    this.handleMousedown = this.handleMousedown.bind(this);
+    this.handleMousemove = this.handleMousemove.bind(this);
+    this.handleMouseup = this.handleMouseup.bind(this);
+
     player.on("touchstart", this.handleTouchstart);
     player.on("touchmove", this.handleTouchmove);
     player.on("touchend", this.handleTouchend);
+    player.on("mousedown", this.handleMousedown);
+    document.addEventListener("mousemove", this.handleMousemove);
+    document.addEventListener("mouseup", this.handleMouseup);
   }
 
   createEl() {
@@ -39,28 +46,46 @@ export class TouchOverlay extends Component {
   }
 
   handleTouchstart(event: any) {
+    this.startSeeking(event.touches[0].clientX);
+  }
+
+  handleTouchmove(event: any) {
+    this.continueSeeking(event.touches[0].clientX);
+  }
+
+  handleTouchend() {
+    this.stopSeeking();
+  }
+
+  handleMousedown(event: any) {
+    this.startSeeking(event.clientX);
+  }
+
+  handleMousemove(event: any) {
+    if (this.touchStateActive) {
+      this.continueSeeking(event.clientX);
+    }
+  }
+
+  handleMouseup() {
+    if (this.touchStateActive) {
+      this.stopSeeking();
+    }
+  }
+
+  startSeeking(startX: number) {
     this.seekNote = document.getElementById("seekNote") as Element;
     if (this.totalDuration) {
       this.addClass("vjs-touch-active");
       this.touchStateActive = true;
       this.totalWidth = this.currentWidth();
-      this.startX = event.touches[0].clientX;
+      this.startX = startX;
     }
   }
 
-  handleTouchend() {
-    this.touchStateActive = false;
-    this.removeClass("vjs-touch-active");
-    if (this.hasClass("vjs-touch-moving")) {
-      this.removeClass("vjs-touch-moving");
-      this.player().currentTime(this.toSeconds);
-    }
-  }
-
-  handleTouchmove(event: any) {
+  continueSeeking(currentX: number) {
     if (this.touchStateActive) {
       this.addClass("vjs-touch-moving");
-      const currentX = event.touches[0].clientX;
       const dx = currentX - this.startX;
       const deltaX = dx / this.totalWidth;
       const currentSeconds = this.player().currentTime();
@@ -75,6 +100,15 @@ export class TouchOverlay extends Component {
       const toTime = this.formatTime(toSeconds);
       videojs.dom.insertContent(this.seekNote!, toTime);
       this.toSeconds = toSeconds;
+    }
+  }
+
+  stopSeeking() {
+    this.touchStateActive = false;
+    this.removeClass("vjs-touch-active");
+    if (this.hasClass("vjs-touch-moving")) {
+      this.removeClass("vjs-touch-moving");
+      this.player().currentTime(this.toSeconds);
     }
   }
 
