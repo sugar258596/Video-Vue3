@@ -1,195 +1,90 @@
-type OneRequired<T, K extends keyof T> = Pick<T, K> & Partial<Omit<T, K>>;
+import videojs from "video.js";
 
-/\*\*
+const Component = videojs.getComponent("Component");
 
-- 预加载 - auto | metadata | none
-- auto: 立即下载视频资源（如果浏览器支持的话），有些手机浏览器节省带宽，会禁止提前下载。
-- metadata: 预加载视频的元数据
-- none: 不预加载视频
-  \*/
-  type Preload = "auto" | "metadata" | "none";
+export class TouchOverlay extends Component {
+private seekNote: Element | undefined;
+private totalDuration: number | undefined;
+private touchStateActive: boolean = false;
+private totalWidth: number = 0;
+private startX: number = 0;
+private toSeconds: number = 0;
 
-type Sources = {
-src: string;
-type: string;
-};
+constructor(player: any, options: any) {
+super(player, options);
 
-/\*\*
+    // 确保事件处理函数中的 `this` 指向当前实例
+    this.handleTouchstart = this.handleTouchstart.bind(this);
+    this.handleTouchmove = this.handleTouchmove.bind(this);
+    this.handleTouchend = this.handleTouchend.bind(this);
 
-- ControlBarBtn 是一个联合类型，描述了控制栏中可能存在的所有按钮类型。
-  \*/
-  type ControlBarBtn =
-  /\*\*
-  - 播放/暂停切换按钮
-    \*/
-    | "PlayToggle"
-    /\*\*
-  - 音量面板，包括音量条和静音按钮
-    \*/
-    | "VolumePanel"
-    /\*\*
-  - 当前播放时间显示
-    \*/
-    | "CurrentTimeDisplay"
-    /\*\*
-  - 时间分隔符，一般用于当前时间和总时间之间
-    \*/
-    | "TimeDivider"
-    /\*\*
-  - 总时长显示
-    \*/
-    | "DurationDisplay"
-    /\*\*
-  - 播放进度控制，包括拖动条
-    \*/
-    | "ProgressControl"
-    /\*\*
-  - 拖动条，用于调整播放进度
-    \*/
-    | "SeekBar"
-    /\*\*
-  - 加载进度条，显示缓冲进度
-    \*/
-    | "LoadProgressBar"
-    /\*\*
-  - 鼠标悬停时间显示，显示鼠标当前位置对应的时间
-    \*/
-    | "MouseTimeDisplay"
-    /\*\*
-  - 播放进度条，显示已播放的进度
-    \*/
-    | "PlayProgressBar"
-    /\*\*
-  - 直播显示，指示当前播放的是直播内容
-    \*/
-    | "LiveDisplay"
-    /\*\*
-  - 跳转到实时按钮，用于直播中跳转到最新的实时进度
-    \*/
-    | "SeekToLive"
-    /\*\*
-  - 剩余时间显示，显示剩余的播放时间
-    \*/
-    | "RemainingTimeDisplay"
-    /\*\*
-  - 自定义控制间隔器，用于调整控制栏布局
-    \*/
-    | "CustomControlSpacer"
-    /\*\*
-  - 播放速度菜单按钮，用于选择播放速度
-    \*/
-    | "PlaybackRateMenuButton"
-    /\*\*
-  - 章节按钮，用于跳转到视频的不同章节
-    \*/
-    | "ChaptersButton"
-    /\*\*
-  - 描述按钮，用于选择视频描述轨道
-    \*/
-    | "DescriptionsButton"
-    /\*\*
-  - 字幕按钮，用于选择字幕轨道
-    \*/
-    | "SubtitlesButton"
-    /\*\*
-  - 标题按钮，用于选择标题轨道
-    \*/
-    | "CaptionsButton"
-    /\*\*
-  - 字幕和标题按钮，用于选择字幕和标题轨道
-    \*/
-    | "SubsCapsButton"
-    /\*\*
-  - 音轨按钮，用于选择音频轨道
-    \*/
-    | "AudioTrackButton"
-    /\*\*
-  - 画中画切换按钮，用于启用或禁用画中画模式
-    \*/
-    | "PictureInPictureToggle"
-    /\*\*
-  - 全屏切换按钮，用于启用或退出全屏模式
-    \*/
-    | "FullscreenToggle";
+    // 添加到 DOM 树中
 
-type Childer = {
-name: ControlBarBtn;
-[key: string]: any;
-};
-type ControlBar = {
-[key in ControlBarBtn]: boolean | object;
-} & {
-Childer: Childer[];
-};
+    player.on("loadedmetadata", () => {
+      this.totalDuration = player.duration();
+    });
 
-type Viode = {
-// 是否自动播放
-autoplay: boolean;
+    this.on("touchstart", this.handleTouchstart);
+    this.on("touchmove", this.handleTouchmove);
+    this.on("touchend", this.handleTouchend);
 
-// 是否显示控制条 - true
-controls: boolean;
+}
 
-// 视频的宽度 - 1280px
-width: string;
+createEl() {
+const overlay = videojs.dom.createEl("div", {
+className: "vjs-touch-overlay",
+tabIndex: -1,
+});
+return overlay;
+}
 
-// 视频的高度 - 720px
-height: string;
+handleTouchstart(event: any) {
+if (this.totalDuration) {
+this.addClass("vjs-touch-active");
+this.touchStateActive = true;
+this.totalWidth = this.currentWidth();
+this.startX = event.touches[0].clientX;
+}
+}
 
-// 是否循环播放 - false
-loop: boolean;
+handleTouchend() {
+this.touchStateActive = false;
+this.removeClass("vjs-touch-active");
 
-// 是否静音播放 - false
-muted: boolean;
+    if (this.hasClass("vjs-touch-moving")) {
+      this.removeClass("vjs-touch-moving");
+      this.player().currentTime(this.toSeconds);
+    }
 
-// 视频地址 - ''
-src: string;
+}
 
-// 视频类型 - video/mp4
-type: string;
+handleTouchmove(event: any) {
+if (this.touchStateActive) {
+this.addClass("vjs-touch-moving");
+const currentX = event.touches[0].clientX;
+const dx = currentX - this.startX;
+const deltaX = dx / this.totalWidth;
+const currentSeconds = this.player().currentTime();
+let toSeconds = currentSeconds! + deltaX \* this.totalDuration!;
 
-// 视频封面地址 - ''
-poster: string;
+      if (toSeconds < 0) {
+        toSeconds = 0;
+      } else if (toSeconds > this.totalDuration!) {
+        toSeconds = this.totalDuration!;
+      }
 
-// 播放速度
-playbackRates: number[];
+      const toTime = this.formatTime(toSeconds);
+      // videojs.dom.insertContent(this.seekNote!, toTime);
+      // this.seekNote!.innerHTML = "123123";
+      this.toSeconds = toSeconds;
+    }
 
-// 提前下载视频 - auto
-preload: Preload;
+}
 
-//视频来源，由对象组成的数组，相当于 video 元素拥有多个 scource 元素。对象应该拥有 src 和 type 两个属性。
-sources: Sources[];
-
-// 视频的宽高比 - 16:9 (设置后，宽高比会自动调整)
-aspectRatio: string;
-
-//是否允许使用 video 的 data-setup 属性启动播放器
-// DTO:videojs.options.autoSetup = false 全局设置才能生效。
-autoSetup: boolean;
-
-// 是否自适应
-fluid: boolean;
-
-// 多少毫秒用户不操作，播放器将进入非活动状态。
-inactivityTimeout: number;
-
-// 语言
-language: string;
-
-// 可以使用的语言列表
-languages: object;
-
-// 是否允许播放器使用新的直播 ui 界面 - false
-liveui: boolean;
-
-//
-//liveTracker.trackingThreshold
-
-//liveTracker.liveTolerance
-
-//控制 UI 元素是否可以有 title 属性 - true
-noUITitleAttributes: boolean;
-
-controlBar: ControlBar;
-};
-
-export type PartialVideo = OneRequired<Viode, "src">;
+formatTime(secondsTotal: number): string {
+secondsTotal = Math.floor(secondsTotal);
+const minutes = Math.floor(secondsTotal / 60);
+const seconds = secondsTotal % 60;
+return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+}
+}
