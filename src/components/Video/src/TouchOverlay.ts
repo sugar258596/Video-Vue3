@@ -12,24 +12,23 @@ export class TouchOverlay extends Component {
 
   constructor(player: any, options: any) {
     super(player, options);
-
+    const el = player.el();
     player.on("loadedmetadata", () => (this.totalDuration = player.duration()));
-    player.on("dblclick", (event: any) =>
-      player.paused() ? player.play() : player.pause()
-    );
+    player.on("dblclick", (event: any) => {
+      if (this.handleClick(event)) return;
+      player.paused() ? player.play() : player.pause();
+    });
     this.handleTouchstart = this.handleTouchstart.bind(this);
     this.handleTouchmove = this.handleTouchmove.bind(this);
     this.handleTouchend = this.handleTouchend.bind(this);
-    this.handleMousedown = this.handleMousedown.bind(this);
-    this.handleMousemove = this.handleMousemove.bind(this);
-    this.handleMouseup = this.handleMouseup.bind(this);
-
+    //
     player.on("touchstart", this.handleTouchstart);
     player.on("touchmove", this.handleTouchmove);
     player.on("touchend", this.handleTouchend);
-    player.on("mousedown", this.handleMousedown);
-    document.addEventListener("mousemove", this.handleMousemove);
-    document.addEventListener("mouseup", this.handleMouseup);
+
+    player.on("mousedown", this.handleTouchstart);
+    player.on("mousemove", this.handleTouchmove);
+    player.on("mouseup", this.handleTouchend);
   }
 
   createEl() {
@@ -45,34 +44,28 @@ export class TouchOverlay extends Component {
     return overlay;
   }
 
+  // 开始按下
   handleTouchstart(event: any) {
-    this.startSeeking(event.touches[0].clientX);
+    if (this.handleClick(event)) return;
+    const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+    this.startSeeking(clientX);
   }
 
+  // 移动中
   handleTouchmove(event: any) {
-    this.continueSeeking(event.touches[0].clientX);
+    if (!this.touchStateActive) return;
+    if (this.handleClick(event)) return;
+    const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+    this.continueSeeking(clientX);
   }
 
+  // 抬起
   handleTouchend() {
+    if (!this.touchStateActive) return;
     this.stopSeeking();
   }
 
-  handleMousedown(event: any) {
-    this.startSeeking(event.clientX);
-  }
-
-  handleMousemove(event: any) {
-    if (this.touchStateActive) {
-      this.continueSeeking(event.clientX);
-    }
-  }
-
-  handleMouseup() {
-    if (this.touchStateActive) {
-      this.stopSeeking();
-    }
-  }
-
+  // 计算当前宽度
   startSeeking(startX: number) {
     this.seekNote = document.getElementById("seekNote") as Element;
     if (this.totalDuration) {
@@ -83,24 +76,25 @@ export class TouchOverlay extends Component {
     }
   }
 
+  // 计算移动宽度
   continueSeeking(currentX: number) {
-    if (this.touchStateActive) {
-      this.addClass("vjs-touch-moving");
-      const dx = currentX - this.startX;
-      const deltaX = dx / this.totalWidth;
-      const currentSeconds = this.player().currentTime();
-      let toSeconds = currentSeconds! + deltaX * this.totalDuration!;
+    if (!this.touchStateActive) return;
+    this.addClass("vjs-touch-moving");
+    this.touchStateActive = true;
+    const dx = currentX - this.startX;
+    const deltaX = dx / this.totalWidth;
+    const currentSeconds = this.player().currentTime();
+    let toSeconds = currentSeconds! + deltaX * this.totalDuration!;
 
-      if (toSeconds < 0) {
-        toSeconds = 0;
-      } else if (toSeconds > this.totalDuration!) {
-        toSeconds = this.totalDuration!;
-      }
-
-      const toTime = this.formatTime(toSeconds);
-      videojs.dom.insertContent(this.seekNote!, toTime);
-      this.toSeconds = toSeconds;
+    if (toSeconds < 0) {
+      toSeconds = 0;
+    } else if (toSeconds > this.totalDuration!) {
+      toSeconds = this.totalDuration!;
     }
+
+    const toTime = this.formatTime(toSeconds);
+    videojs.dom.insertContent(this.seekNote!, toTime);
+    this.toSeconds = toSeconds;
   }
 
   stopSeeking() {
@@ -111,11 +105,18 @@ export class TouchOverlay extends Component {
       this.player().currentTime(this.toSeconds);
     }
   }
-
+  // 计算当前 时间
   formatTime(secondsTotal: number): string {
     secondsTotal = Math.floor(secondsTotal);
     const minutes = Math.floor(secondsTotal / 60);
     const seconds = secondsTotal % 60;
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+  }
+  //判断点击的位置是否在 controlBar上，
+  //如果点击的位置在controlBar上，就返回true，否则返回false
+  handleClick(event: any): boolean {
+    const target = event.target;
+    if (target.closest(".vjs-control-bar")) return true;
+    return false;
   }
 }

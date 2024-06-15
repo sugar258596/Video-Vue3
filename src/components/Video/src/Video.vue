@@ -67,7 +67,7 @@ const potions = {
     ],
   },
 };
-videojs.hook("beforesetup", (el: Element, options: any) => {
+videojs.hook("beforesetup", (_el: Element, options: any) => {
   // 注册自定义按钮组件
   videojs.registerComponent("CustomButton", CustomButton);
   videojs.registerComponent("TouchOverlay", TouchOverlay as any);
