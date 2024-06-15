@@ -10,8 +10,7 @@ import mp4Url from "../../../assets/IronMan.mp4";
 import OIP from "../../../assets/OIP.jpg";
 import videojs from "video.js";
 import zhCN from "video.js/dist/lang/zh-CN.json";
-import { TouchOverlay } from "./TouchOverlay";
-import { CustomButton } from "./FunButton";
+import { TouchOverlay, CustomButton } from "./TouchOverlay";
 
 videojs.addLanguage("zh-CN", zhCN);
 
