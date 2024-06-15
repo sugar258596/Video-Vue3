@@ -1,6 +1,15 @@
 type OneRequired<T, K extends keyof T> = Pick<T, K> & Partial<Omit<T, K>>;
 
 /**
+ * autoplay - muted | play | any
+ * muted:  静音播放
+ * play:  播放
+ * any:  先执行play，再执行muted
+ */
+
+type autoplay = "muted" | "play" | "any";
+
+/**
  *  预加载 - auto | metadata | none
  * auto:  立即下载视频资源（如果浏览器支持的话），有些手机浏览器节省带宽，会禁止提前下载。
  * metadata: 预加载视频的元数据
@@ -110,19 +119,20 @@ type ControlBarBtn =
    */
   | "FullscreenToggle";
 
-type Childer = {
-  name: ControlBarBtn;
+type Children = {
+  name: ControlBarBtn | string;
   [key: string]: any;
 };
-type ControlBar = {
-  [key in ControlBarBtn]: boolean | object;
+
+export type ControlBar = {
+  [key in ControlBarBtn]?: boolean | object;
 } & {
-  Childer: Childer[];
+  children: Children[];
 };
 
-type Viode = {
+export type Viode = {
   // 是否自动播放
-  autoplay: boolean;
+  autoplay: boolean | autoplay;
 
   // 是否显示控制条 - true
   controls: boolean;
@@ -179,15 +189,10 @@ type Viode = {
   // 是否允许播放器使用新的直播ui界面 - false
   liveui: boolean;
 
-  //
-  //liveTracker.trackingThreshold
-
-  //liveTracker.liveTolerance
-
   //控制UI元素是否可以有title属性 - true
   noUITitleAttributes: boolean;
 
   controlBar: ControlBar;
 };
 
-export type PartialVideo = OneRequired<Viode, "src">;
+export type ViodeOption = Partial<Viode>;

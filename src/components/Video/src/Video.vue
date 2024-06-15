@@ -11,6 +11,7 @@ import OIP from "../../../assets/OIP.jpg";
 import videojs from "video.js";
 import zhCN from "video.js/dist/lang/zh-CN.json";
 import { TouchOverlay, CustomButton } from "./TouchOverlay";
+import { ViodeOption } from "./type";
 
 videojs.addLanguage("zh-CN", zhCN);
 
@@ -19,7 +20,7 @@ defineOptions({
 });
 const video = ref(null);
 const videoInstance = shallowRef(); //提高性能
-const potions = {
+const potions: ViodeOption = {
   sources: [
     {
       type: "video/mp4",
@@ -29,16 +30,11 @@ const potions = {
   autoplay: "any", //是否自动播放
   loop: false, //是否循环播放
   controls: true, //控制器
-  preload: true, //是否预加载
+  preload: "metadata", //是否预加载
   language: "zh-CN", //显示的语言 中文
   poster: OIP, //封面图
   playbackRates: [0.5, 1, 1.5, 2], //播放速度
   fluid: true,
-  svg: {
-    zuo: "icon-zuo",
-    you: "icon-you",
-  },
-
   // 设置控制条组件
   controlBar: {
     children: [
