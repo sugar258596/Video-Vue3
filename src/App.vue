@@ -3,11 +3,11 @@
     <BasicVideo></BasicVideo>
   </div>
 </template>
- 
-<script setup lang="ts">
-import { BasicVideo } from './components/Video';
 
+<script setup lang="ts">
+import { BasicVideo } from "./components/Video";
 </script>
-<style lang="scss"  >
-@import url('video.js/dist/video-js.min.css');
+<style lang="scss">
+@import url("video.js/dist/video-js.min.css");
+@import url(./assets/font/iconfont.css);
 </style>
