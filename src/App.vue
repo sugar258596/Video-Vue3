@@ -7,7 +7,4 @@
 <script setup lang="ts">
 import { BasicVideo } from "./components";
 </script>
-<style lang="scss">
-@import url("video.js/dist/video-js.min.css");
-@import url(./assets/font/iconfont.css);
-</style>
+<style lang="scss"></style>

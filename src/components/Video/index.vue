@@ -236,3 +236,8 @@ const getComponent = () => {
   }
 }
 </style>
+
+<style>
+@import url("video.js/dist/video-js.min.css");
+@import url(../../assets/font/iconfont.css);
+</style>
