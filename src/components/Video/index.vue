@@ -1,13 +1,11 @@
 <template>
-  <div class="video">
-    <video ref="video" class="video-js"></video>
-  </div>
+  <video ref="video" class="video-js"></video>
 </template>
 
 <script setup lang="ts">
 import { ref, shallowRef, onMounted } from "vue";
-import mp4Url from "../../../assets/IronMan.mp4";
-import OIP from "../../../assets/OIP.jpg";
+import mp4Url from "../../assets/IronMan.mp4";
+import OIP from "../../assets/OIP.jpg";
 import videojs from "video.js";
 import zhCN from "video.js/dist/lang/zh-CN.json";
 import { TouchOverlay, CustomButton } from "./TouchOverlay";
@@ -166,77 +164,75 @@ const getComponent = () => {
 };
 </script>
 <style scoped lang="scss">
-.video {
-  :deep(.video-js) {
-    .vjs-current-time {
-      display: block;
-    }
+:deep(.video-js) {
+  .vjs-current-time {
+    display: block;
+  }
 
-    .vjs-time-control {
-      display: block;
-    }
+  .vjs-time-control {
+    display: block;
+  }
 
-    .vjs-time-control {
-      min-width: 0;
-      padding-left: 0.2em;
-      padding-right: 0.2em;
-    }
+  .vjs-time-control {
+    min-width: 0;
+    padding-left: 0.2em;
+    padding-right: 0.2em;
+  }
 
-    .my-custom-button {
-      background-color: #007bff;
-      color: #fff;
-    }
+  .my-custom-button {
+    background-color: #007bff;
+    color: #fff;
+  }
 
-    .my-custom-button:hover {
-      background-color: #0056b3;
-    }
+  .my-custom-button:hover {
+    background-color: #0056b3;
+  }
 
-    .vjs-touch-overlay {
-      position: absolute;
-      left: 0;
-      top: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-      height: 100%;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-      cursor: pointer;
-      pointer-events: none;
-    }
+  .vjs-touch-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: pointer;
+    pointer-events: none;
+  }
 
-    &.vjs-has-started .vjs-touch-overlay {
-      pointer-events: auto;
-    }
+  &.vjs-has-started .vjs-touch-overlay {
+    pointer-events: auto;
+  }
 
-    .vjs-touch-seek-note {
-      display: none;
-      justify-content: center;
-      align-items: center;
-      margin: auto;
-      padding: 10px 15px;
-      border-radius: 2px;
-      background: rgba(#000, 0.3);
-      color: #fff;
-      font-size: 16px;
-    }
+  .vjs-touch-seek-note {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+    padding: 10px 15px;
+    border-radius: 2px;
+    background: rgba(#000, 0.3);
+    color: #fff;
+    font-size: 16px;
+  }
 
-    .vjs-touch-overlay.vjs-touch-active.vjs-touch-moving .vjs-touch-seek-note {
-      display: flex;
-    }
-    .vjs-zuo-svg {
-      width: 100%;
-      height: 100%;
-      background: url(../../../assets/zuo.svg) no-repeat center center;
-    }
-    .vjs-you-sgv {
-      width: 100%;
-      height: 100%;
-      background: url(../../../assets/you.svg) no-repeat center center;
-    }
+  .vjs-touch-overlay.vjs-touch-active.vjs-touch-moving .vjs-touch-seek-note {
+    display: flex;
+  }
+  .vjs-zuo-svg {
+    width: 100%;
+    height: 100%;
+    background: url(../../../assets/zuo.svg) no-repeat center center;
+  }
+  .vjs-you-sgv {
+    width: 100%;
+    height: 100%;
+    background: url(../../../assets/you.svg) no-repeat center center;
   }
 }
 </style>

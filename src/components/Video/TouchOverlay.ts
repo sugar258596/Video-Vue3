@@ -13,7 +13,6 @@ class TouchOverlay extends Component {
 
   constructor(player: any, options: any) {
     super(player, options);
-    const el = player.el();
     player.on("loadedmetadata", () => (this.totalDuration = player.duration()));
     player.on("dblclick", (event: any) => {
       if (this.handleClick(event)) return;

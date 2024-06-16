@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { BasicVideo } from "./components/Video";
+import { BasicVideo } from "./components";
 </script>
 <style lang="scss">
 @import url("video.js/dist/video-js.min.css");

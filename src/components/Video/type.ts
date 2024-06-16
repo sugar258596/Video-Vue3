@@ -1,4 +1,5 @@
-type OneRequired<T, K extends keyof T> = Pick<T, K> & Partial<Omit<T, K>>;
+export type OneRequired<T, K extends keyof T> = Pick<T, K> &
+  Partial<Omit<T, K>>;
 
 /**
  * autoplay - muted | play | any
