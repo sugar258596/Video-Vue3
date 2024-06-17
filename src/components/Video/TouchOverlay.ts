@@ -35,6 +35,7 @@ class TouchOverlay extends Component {
     const overlay = videojs.dom.createEl("div", {
       className: "vjs-touch-overlay",
       tabIndex: -1,
+      title: "时间",
     });
     let seekNote = videojs.dom.createEl("span", {
       className: "vjs-touch-seek-note",
