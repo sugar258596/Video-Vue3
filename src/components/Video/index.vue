@@ -1,5 +1,5 @@
 <template>
-  <div class="video">
+  <div class="video" ref="container">
     <video ref="video" class="video-js"></video>
   </div>
 </template>
@@ -7,18 +7,23 @@
 <script setup lang="ts">
 import { ref, shallowRef, onMounted } from "vue";
 import mp4Url from "../../assets/IronMan.mp4";
+
 import OIP from "../../assets/OIP.jpg";
 import videojs from "video.js";
 import zhCN from "video.js/dist/lang/zh-CN.json";
 import { TouchOverlay, CustomButton } from "./TouchOverlay";
+
 import { ViodeOption } from "./type";
+import Danmaku from "./danmaku";
 
 videojs.addLanguage("zh-CN", zhCN);
 
 defineOptions({
   name: "Basievideo",
 });
+const container = ref(null);
 const video = ref(null);
+
 const videoInstance = shallowRef(); //提高性能
 const potions: ViodeOption = {
   sources: [
@@ -71,8 +76,10 @@ videojs.hook("beforesetup", (_el: Element, options: any) => {
 
 onMounted(() => {
   initVideo();
-
-  if (!video.value) return;
+  new Danmaku({
+    container: container.value!,
+    texts: ["123123123", "23423423"],
+  });
 });
 
 /**
