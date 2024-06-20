@@ -14,7 +14,6 @@ import zhCN from "video.js/dist/lang/zh-CN.json";
 import { TouchOverlay, CustomButton } from "./TouchOverlay";
 
 import { ViodeOption } from "./type";
-import Danmaku from "./danmaku";
 
 videojs.addLanguage("zh-CN", zhCN);
 
@@ -76,10 +75,6 @@ videojs.hook("beforesetup", (_el: Element, options: any) => {
 
 onMounted(() => {
   initVideo();
-  new Danmaku({
-    container: container.value!,
-    texts: ["123123123", "23423423"],
-  });
 });
 
 /**
