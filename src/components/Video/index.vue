@@ -1,6 +1,7 @@
 <template>
   <div class="video" ref="container">
-    <video ref="video" class="video-js"></video>
+    <!-- <video ref="video" class="video-js"></video> -->
+    <BasicDanmaku></BasicDanmaku>
   </div>
 </template>
 
@@ -14,6 +15,7 @@ import zhCN from "video.js/dist/lang/zh-CN.json";
 import { TouchOverlay, CustomButton } from "./TouchOverlay";
 
 import { ViodeOption } from "./type";
+import {BasicDanmaku} from '../index'
 
 videojs.addLanguage("zh-CN", zhCN);
 
@@ -169,6 +171,8 @@ const getComponent = () => {
 </script>
 <style scoped lang="scss">
 .video {
+  position: relative;
+  height: 700px;
   :deep(.video-js) {
     height: 100px;
     .vjs-current-time {
@@ -236,5 +240,5 @@ const getComponent = () => {
 
 <style>
 @import url("video.js/dist/video-js.min.css");
-@import url(../../assets/font/iconfont.css);
+@import url('../../assets/font/iconfont.css');
 </style>
