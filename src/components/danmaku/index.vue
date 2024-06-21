@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, reactive, nextTick } from "vue";
+import { onMounted, ref, reactive } from "vue";
 const container = ref<HTMLDivElement>();
 const track = ref(28); // 轨道数量
 const trackHight = ref(0); // 轨道高度
@@ -26,9 +26,9 @@ const createTrack = () => {
  */
 const getContainer = () => {
   trackHight.value = Math.floor(container.value!.offsetHeight / track.value);
-  const width = container.value?.offsetWidth! * 1.8;
+  const width = container.value?.offsetWidth! * 2;
   container.value!.style.setProperty("--danmaku-stop", -width! + "px");
-  for (let index = 0; index < 10; index++) {
+  for (let index = 0; index < 15; index++) {
     createDanmaku();
   }
 };
@@ -39,8 +39,7 @@ const getContainer = () => {
 const createDanmaku = () => {
   const div = document.createElement("div");
   div.className = "danmaku-item";
-  div.innerHTML =
-    "弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕弹幕";
+  div.innerHTML = "弹幕 ";
   div.addEventListener("animationend", handleAnimationEnd);
   container.value?.appendChild(div);
   // 弹幕宽度
@@ -55,7 +54,6 @@ const createDanmaku = () => {
     div.style.right = -width + "px";
     createDan[div.dataset.line] = width;
   }
-  console.log(createDan);
 };
 
 /**
@@ -63,11 +61,9 @@ const createDanmaku = () => {
  * @param {Event} e - 事件对象
  */
 const handleAnimationEnd = (e: Event) => {
-  nextTick(() => {
-    const target = e.target as HTMLElement;
-    container.value?.removeChild(target);
-    // createDanmaku();
-  });
+  const target = e.target as HTMLElement;
+  container.value?.removeChild(target);
+  // createDanmaku();
 };
 </script>
 
