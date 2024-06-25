@@ -11,6 +11,7 @@ import { onMounted, ref, reactive } from "vue";
 import { danmus } from "./src/data";
 
 import Caves from "./src/Caves";
+import Danmaku from "./src/index";
 
 const container = ref<HTMLDivElement>(); // 容器dom元素
 const containerWidth = ref(0); // 容器宽度
@@ -45,11 +46,12 @@ const handleClick2 = (boolean: boolean) => {
 };
 
 onMounted(() => {
+  new Danmaku(container.value!, danmus);
   // getContainer();
-  new Caves({
-    dom: container.value!,
-    data: danmus,
-  });
+  // new Caves({
+  //   dom: container.value!,
+  //   data: danmus,
+  // });
 });
 
 /**
@@ -138,7 +140,7 @@ const handleAnimationEnd = (e: Event) => {
  * @description - 创建轨道
  * @return {string} - 返回轨道数
  */
-const createTrack = () => {
+const createTrack = (): string => {
   const nuber = Math.floor(Math.random() * track.value) + 1;
   return nuber.toString();
 };
@@ -155,12 +157,13 @@ const createTrack = () => {
   position: absolute;
   top: 30px;
   left: 0;
-  width: 100%;
+  width: 80%;
   height: 100%;
   z-index: 1000;
+  margin-left: 50px;
   background-color: aqua;
   // margin-left: 100px;
-  overflow: hidden;
+  // overflow: hidden;
   :deep(.danmaku-item) {
     --top: 0; // 距离顶部距离
     --animation-duration: 5s; // 动画时长
@@ -196,5 +199,13 @@ const createTrack = () => {
       transform: translateX(var(--danmaku-stop));
     }
   }
+}
+</style>
+
+<style>
+.danmu {
+  position: absolute;
+  font-size: 20px;
+  white-space: nowrap;
 }
 </style>
