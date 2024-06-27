@@ -1,42 +1,49 @@
+import { h, createApp } from "vue";
+import { DanmakuItem } from "./index";
+
 class Danmaku {
   private dom!: HTMLElement;
   private domWidth!: number;
-  private endedDanmus: Set<HTMLElement> = new Set(); // 用于存储结束的 DOM 元素
+  private danmus: Set<HTMLElement> = new Set(); // 当前活跃的弹幕
+  private endedDanmus: Map<string, HTMLElement> = new Map(); // 用于存储结束的 DOM 元素
   private top: number = 20;
+  private data: any;
+  private index: number = 0;
   constructor(dom: HTMLElement, data: any) {
+    this.data = data;
     this.dom = dom;
     this.domWidth = dom.offsetWidth;
-    setInterval(() => {
-      this.addDanmu();
-    }, 100);
+    // setInterval(() => {
+    //   this.addDanmu(this.data[this.index]);
+    //   this.index++;
+    // }, 1000);
   }
 
   // 1.创建弹幕
-  createDanmu() {
+  createDanmu(text: string = "") {
     let div: HTMLElement;
     if (this.endedDanmus.size > 0) {
-      const iterator = this.endedDanmus.values();
-      div = iterator.next().value!;
-      this.endedDanmus.delete(div); // 根据 ID 删除元素
-      div.innerText = new Date().getTime().toString();
+      const iterator = this.endedDanmus.entries();
+      const [id, element] = iterator.next().value!;
+      div = element;
+      this.endedDanmus.delete(id); // 根据 ID 删除元素
     } else {
-      div = document.createElement("div");
-      div.className = "danmu";
-      div.innerText = "hello world";
+      div = this.createDanmakuItem(text);
       this.dom.appendChild(div);
-      console.log("---------------------------------", this.endedDanmus);
     }
+    this.danmus.add(div);
     return div;
   }
-  // 2.添加弹幕样式
-  addDanmu() {
-    const dom = this.createDanmu();
+
+  // 2.添加样式
+  addDanmu(text: string = "") {
+    const dom = this.createDanmu(text);
     this.handleDanmu(dom);
     dom.id = `danmu-${new Date().getTime()}`;
     dom.classList.add("danmu");
     dom.style.left = this.domWidth + "px";
     const time = Math.random() * 5000 + 5000;
-    dom.style.transition = ` -webkit-transform ${time}ms linear 0s, transform ${time}ms linear 0s`;
+    dom.style.transition = `-webkit-transform ${time}ms linear 0s, transform ${time}ms linear 0s`;
     dom.style.animation = `identifier ease 0s 1 normal none running none`;
     const x = dom.offsetWidth + this.domWidth;
     dom.style.transform = `translateX(-${x}px)`;
@@ -44,11 +51,11 @@ class Danmaku {
     let y = Math.floor(Math.random() * 10);
     dom.style.top = `${y * this.top}px`;
   }
-  // 3.添加弹幕事件
+
+  // 3.添加事件
   handleDanmu(dom: HTMLElement) {
     let transition: string;
     let transform: string;
-
     const mouseenter = (e: Event) => {
       const event = e.target as HTMLElement;
       transition = dom.style.transition;
@@ -69,10 +76,11 @@ class Danmaku {
 
     const transitionEndHandler = (e: Event) => {
       const event = e.target as HTMLElement;
+      const id = event.id;
       event.style.transition = `-webkit-transform 0s linear 0s, transform 0s linear 0s`;
       event.style.transform = `none`;
-      event.innerText = "";
-      this.endedDanmus.add(event);
+      this.danmus.delete(event);
+      this.endedDanmus.set(id, event);
       dom.removeEventListener("mouseenter", mouseenter);
       dom.removeEventListener("mouseleave", mouseleave);
     };
@@ -83,6 +91,46 @@ class Danmaku {
     dom.addEventListener("transitionend", transitionEndHandler);
     dom.addEventListener("mouseenter", mouseenter);
     dom.addEventListener("mouseleave", mouseleave);
+  }
+
+  // 5.添加发送弹幕功能
+  sendDanmu(text: string) {
+    this.addDanmu(text);
+  }
+
+  // 6.添加清除弹幕功能
+  clearDanmu() {
+    this.dom.innerHTML = "";
+    console.log("添加清除弹幕功能");
+  }
+  // 7.添加暂停弹幕功能
+  pauseDanmu() {
+    this.danmus.forEach((danmu) => {
+      const computedStyle = window.getComputedStyle(danmu);
+      danmu.dataset.transform = danmu.style.transform; // 保持当前 transform 状态
+      danmu.dataset.transition = danmu.style.transition; // 保持当前 transition 状态
+      danmu.style.transform = computedStyle.transform; // 设置 transform 状态
+      danmu.style.transition = "none"; // 取消 transition
+    });
+  }
+  // 8.添加恢复弹幕功能
+  resumeDanmu() {
+    this.danmus.forEach((danmu) => {
+      danmu.style.transform = danmu.dataset.transform!; // 恢复 transform 状态
+      danmu.style.transition = danmu.dataset.transition!; // 恢复 transition 状态
+    });
+  }
+
+  createDanmakuItem(text: string) {
+    const app = createApp({
+      render() {
+        return h(DanmakuItem, {
+          text,
+        });
+      },
+    });
+    const vm = app.mount(document.createElement("div"));
+    return vm.$el;
   }
 }
 

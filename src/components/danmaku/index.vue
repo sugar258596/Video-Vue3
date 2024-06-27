@@ -1,12 +1,14 @@
 <template>
   <div class="danmaku-container" ref="container">
-    <!-- <DanmakuItem></DanmakuItem> -->
+    <!-- <DanmakuItem :text="'32'"></DanmakuItem> -->
   </div>
-  <canvas></canvas>
+  <div><button @click="handele1">发送</button></div>
+  <div><button @click="handele2">暂停按钮</button></div>
+  <div><button @click="handele3">播放按钮</button></div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, onUnmounted } from "vue";
+import { onMounted, ref } from "vue";
 import { danmus } from "./src/data";
 
 // import Caves from "./src/Caves";
@@ -14,14 +16,25 @@ import Danmaku from "./src/create";
 import { DanmakuItem } from "./src";
 
 const container = ref<HTMLDivElement>(); // 容器dom元素
+const danmaku = ref();
 
 onMounted(() => {
-  new Danmaku(container.value!, danmus);
-  console.log("=========");
+  danmaku.value = new Danmaku(container.value!, danmus);
 });
-onUnmounted(() => {
-  console.log("////////////////////////");
-});
+
+const handele1 = () => {
+  console.log("发送");
+  danmaku.value?.sendDanmu("123");
+};
+const handele2 = () => {
+  console.log("暂停按钮");
+  danmaku.value?.pauseDanmu();
+};
+
+const handele3 = () => {
+  console.log("播放按钮");
+  danmaku.value?.resumeDanmu();
+};
 </script>
 
 <style lang="scss" scoped>
