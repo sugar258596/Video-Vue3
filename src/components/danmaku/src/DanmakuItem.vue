@@ -47,7 +47,6 @@ defineProps({
     min-height: 30px;
     max-height: 400px;
     border-radius: 50%;
-    background-color: aqua;
     overflow: hidden;
     object-fit: contain;
     aspect-ratio: 1/1;

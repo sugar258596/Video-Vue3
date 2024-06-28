@@ -1,51 +1,55 @@
-import { h, createApp } from "vue";
+import { h, VNode, render } from "vue";
 import { DanmakuItem } from "./index";
 
+type LastTrack = { element: HTMLElement; time: number };
+
 class Danmaku {
-  private dom!: HTMLElement;
-  private domWidth!: number;
+  private dom: HTMLElement;
+  private data: any; // 弹幕数据
+  private index: number = 0; // 当前弹幕索引
+  private domWidth: number; // dom 宽度
   private danmus: Set<HTMLElement> = new Set(); // 当前活跃的弹幕
-  private endedDanmus: Map<string, HTMLElement> = new Map(); // 用于存储结束的 DOM 元素
+  private lastDanmuInTrack: Map<number, LastTrack> = new Map(); // 存储每个轨道最后一个弹幕及其运动时间
+  private endedDanmus: HTMLElement[] = []; // 用于存储结束的 DOM 元素
+  private tracks: number = 15; // 弹幕轨道数
   private isPaused: boolean = false; // 是否暂停
-  private top: number = 20;
-  private data: any;
-  private index: number = 0;
+  private isPausedManually: boolean = false; // 标志是否是手动暂停
+  private trackTop: number = 25; // 弹幕轨道高度
+  private gap: number = 50; // 弹幕轨道间距
+
   constructor(dom: HTMLElement, data: any) {
-    this.data = data;
     this.dom = dom;
+    this.data = data;
     this.domWidth = dom.offsetWidth;
-    setInterval(() => {
-      this.addDanmu(this.data[this.index]);
-      this.index++;
-    }, 1000);
-  }
-  // 0.创建弹幕元素
-  createDanmakuItem(text: string) {
-    const app = createApp({
-      render() {
-        return h(
-          DanmakuItem,
-          {
-            text,
-          },
-          {
-            // "danmaku-header": () => h("div", "This is the header slot content"),
-          }
-        );
-      },
-    });
-    const vm = app.mount(document.createElement("div"));
-    return vm.$el;
+    this.initDanmaku();
   }
 
-  // 1.创建弹幕容器
-  createDanmu(text: string = "") {
+  private initDanmaku() {
+    setInterval(() => {
+      if (!this.isPaused && this.index < this.data.length) {
+        this.addDanmu(this.data[this.index]);
+        this.index++;
+      }
+    }, 1000);
+  }
+
+  // 创建弹幕元素
+  private createDanmakuItem(text: string): HTMLElement {
+    const vnode = h(DanmakuItem, { text }) as VNode;
+    const container = document.createElement("div");
+    // 手动渲染 VNode 并挂载到容器上
+    render(vnode, container);
+
+    return container.firstChild as HTMLElement;
+  }
+
+  // 创建弹幕容器
+  private createDanmu(text: string = "") {
     let div: HTMLElement;
-    if (this.endedDanmus.size > 0) {
-      const iterator = this.endedDanmus.entries();
-      const [id, element] = iterator.next().value!;
-      div = element;
-      this.endedDanmus.delete(id); // 根据 ID 删除元素
+    if (this.endedDanmus[0]) {
+      div = this.endedDanmus.pop()!;
+      const element = div.querySelector(".danmaku-text") as HTMLElement;
+      element.innerText = text;
     } else {
       div = this.createDanmakuItem(text);
       this.dom.appendChild(div);
@@ -54,82 +58,96 @@ class Danmaku {
     return div;
   }
 
-  // 2.添加样式
-  addDanmu(text: string = "") {
+  // 添加样式
+  private addDanmu(text: string = "") {
     const dom = this.createDanmu(text);
     this.handleDanmu(dom);
-    dom.id = `danmu-${new Date().getTime()}`;
+    dom.id = `danmu-${Date.now()}`;
     dom.classList.add("danmu");
     dom.style.left = this.domWidth + "px";
-    const time = Math.random() * 5000 + 5000;
-    dom.style.animation = `move ${time}ms linear `;
+
+    const y = Math.floor(Math.random() * this.tracks) + 1;
+    dom.style.top = `${y * this.trackTop}px`;
+
+    let time = Math.random() * 5000 + 5000;
+    const lastDanmuInfo = this.lastDanmuInTrack.get(y);
+    if (lastDanmuInfo) {
+      const lastDanmuRight =
+        parseFloat(lastDanmuInfo.element.style.left) -
+        lastDanmuInfo.element.offsetWidth;
+      const newLeft = Math.max(this.domWidth, lastDanmuRight + this.gap);
+      dom.style.left = `${newLeft}px`;
+    }
+
+    dom.style.animation = `move ${time}ms linear`;
     const x = dom.offsetWidth + this.domWidth;
     dom.style.setProperty("--translateX", `-${x}px`);
-    // 20-60 之间随机数
-    let y = Math.floor(Math.random() * 10);
-    dom.style.top = `${y * this.top}px`;
+    this.lastDanmuInTrack.set(y, { element: dom, time });
   }
 
-  // 3.添加事件
-  handleDanmu(dom: HTMLElement) {
-    // 鼠标移入，暂停动画
-    const mouseenter = (e: Event) => {
+  // 处理弹幕事件
+  private handleDanmu(dom: HTMLElement) {
+    const pauseAnimation = (e: Event) => {
       e.stopPropagation();
-      const event = e.target as HTMLElement;
-      event.style.animationPlayState = "paused";
+      (e.target as HTMLElement).style.animationPlayState = "paused";
     };
 
-    // 鼠标移出，恢复动画
-    const mouseleave = (e: Event) => {
+    const resumeAnimation = (e: Event) => {
       e.stopPropagation();
-      const event = e.target as HTMLElement;
-      event.style.animationPlayState = "running";
+      if (!this.isPausedManually) {
+        (e.target as HTMLElement).style.animationPlayState = "running";
+      }
     };
 
-    //动画结束
-    const transitionEndHandler = (e: Event) => {
+    const animationEndHandler = (e: Event) => {
       const event = e.target as HTMLElement;
-      const id = event.id;
-      event.style.animation = `none`; // 重置动画
+      event.style.animation = "none";
+      const element = event.querySelector(".danmaku-text") as HTMLElement;
+      element.innerText = "";
       this.danmus.delete(event);
-      this.endedDanmus.set(id, event);
-
-      dom.removeEventListener("mouseenter", mouseenter);
-      dom.removeEventListener("mouseleave", mouseleave);
+      this.endedDanmus.push(event);
+      dom.removeEventListener("animationend", animationEndHandler);
+      dom.removeEventListener("mouseenter", pauseAnimation);
+      dom.removeEventListener("mouseleave", resumeAnimation);
     };
 
-    // 移除之前可能添加的相同类型的事件监听器，防止重复添加
-    dom.removeEventListener("transitionend", transitionEndHandler);
-    dom.addEventListener("transitionend", transitionEndHandler);
-
-    dom.addEventListener("mouseenter", mouseenter);
-    dom.addEventListener("mouseleave", mouseleave);
+    dom.removeEventListener("animationend", animationEndHandler);
+    dom.addEventListener("animationend", animationEndHandler);
+    dom.addEventListener("mouseenter", pauseAnimation);
+    dom.addEventListener("mouseleave", resumeAnimation);
   }
 
-  // 5.添加发送弹幕功能
+  // 发送弹幕
   sendDanmu(text: string) {
     this.addDanmu(text);
   }
 
-  // 6.添加清除弹幕功能
+  // 清除弹幕
   clearDanmu() {
     this.dom.innerHTML = "";
-    console.log("添加清除弹幕功能");
+    this.danmus.clear();
+    this.endedDanmus = [];
+    this.lastDanmuInTrack.clear();
+    console.log("清除所有弹幕");
   }
-  // 7.添加暂停弹幕功能
+
+  // 暂停弹幕
   pauseDanmu() {
-    if (this.isPaused) return; // 如果已经暂停，直接返回
+    if (this.isPaused) return;
+    this.isPausedManually = true;
     this.isPaused = true;
     this.danmus.forEach((danmu) => {
-      danmu.style.animationPlayState = "paused"; // 暂停动画
+      danmu.style.animationPlayState = "paused";
     });
   }
-  // 8.添加恢复弹幕功能
+
+  // 恢复弹幕
   resumeDanmu() {
-    if (!this.isPaused) return; // 如果没有暂停，直接返回
+    if (!this.isPaused) return;
+    this.isPausedManually = false;
     this.isPaused = false;
     this.danmus.forEach((danmu) => {
-      danmu.style.animationPlayState = "running"; // 暂停动画
+      danmu.style.animationPlayState = "running";
     });
   }
 }
