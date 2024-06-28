@@ -13,7 +13,7 @@ import { danmus } from "./src/data";
 
 // import Caves from "./src/Caves";
 import Danmaku from "./src/create";
-import { DanmakuItem } from "./src";
+// import { DanmakuItem } from "./src";
 
 const container = ref<HTMLDivElement>(); // 容器dom元素
 const danmaku = ref();
@@ -48,20 +48,28 @@ const handele3 = () => {
   margin-left: 100px;
   background-color: aqua;
   overflow: hidden;
+  :deep(.danmu) {
+    --translateX: 0;
+    position: absolute;
+    font-size: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
 }
 </style>
 
-<style>
-.danmu {
-  position: absolute;
-  font-size: 20px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
+<style lang="scss">
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+@keyframes move {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(var(--translateX));
+  }
 }
 </style>
