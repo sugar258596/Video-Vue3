@@ -1,8 +1,9 @@
 <template>
   <div class="danmaku-item-content dainzan-cursor">
     <div class="danmaku-item">
-      <slot name="danmakut-header" v-if="$slots['danmakut-header']"></slot>
-      <div class="danmaku-img" v-else></div>
+      <slot name="danmaku-header"></slot>
+      <slot name="danmaku-footer"></slot>
+      <div class="danmaku-img"></div>
       <p class="danmaku-text">{{ text }}</p>
       <div class="danmaku-btn">
         <span class="danmaku-svg" :class="svg ? 'dianzan' : 'dainzan-acvter'">

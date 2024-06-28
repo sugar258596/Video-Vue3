@@ -6,6 +6,7 @@ class Danmaku {
   private domWidth!: number;
   private danmus: Set<HTMLElement> = new Set(); // 当前活跃的弹幕
   private endedDanmus: Map<string, HTMLElement> = new Map(); // 用于存储结束的 DOM 元素
+  private isPaused: boolean = false; // 是否暂停
   private top: number = 20;
   private data: any;
   private index: number = 0;
@@ -105,6 +106,8 @@ class Danmaku {
   }
   // 7.添加暂停弹幕功能
   pauseDanmu() {
+    if (this.isPaused) return; // 如果已经暂停，直接返回
+    this.isPaused = true; // 设置标志位为 true
     this.danmus.forEach((danmu) => {
       const computedStyle = window.getComputedStyle(danmu);
       danmu.dataset.transform = danmu.style.transform; // 保持当前 transform 状态
@@ -115,6 +118,8 @@ class Danmaku {
   }
   // 8.添加恢复弹幕功能
   resumeDanmu() {
+    if (!this.isPaused) return; // 如果没有暂停，直接返回
+    this.isPaused = false; // 设置标志位为 false
     this.danmus.forEach((danmu) => {
       danmu.style.transform = danmu.dataset.transform!; // 恢复 transform 状态
       danmu.style.transition = danmu.dataset.transition!; // 恢复 transition 状态
@@ -124,9 +129,15 @@ class Danmaku {
   createDanmakuItem(text: string) {
     const app = createApp({
       render() {
-        return h(DanmakuItem, {
-          text,
-        });
+        return h(
+          DanmakuItem,
+          {
+            text,
+          },
+          {
+            "danmaku-header": () => h("div", "This is the header slot content"),
+          }
+        );
       },
     });
     const vm = app.mount(document.createElement("div"));
