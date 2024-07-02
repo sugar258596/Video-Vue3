@@ -59,7 +59,7 @@ class Danmu {
     this.danmus.push(danmuItem);
   }
 
-  private isOverlapping(x: number, y: number, fontSize: number): boolean {
+  private isOverlapping(_x: number, y: number, fontSize: number): boolean {
     for (const danmu of this.danmus) {
       if (y < danmu.y + danmu.fontSize && y + fontSize > danmu.y) {
         return true;

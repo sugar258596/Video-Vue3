@@ -22,12 +22,20 @@ class Danmaku {
     this.data = data;
     this.domWidth = dom.offsetWidth;
     this.initDanmaku();
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") {
+        console.log("页面在后台，数组状态:", this.endedDanmus);
+      } else {
+        console.log("页面在前台，数组状态:", this.endedDanmus);
+      }
+    });
   }
 
   private initDanmaku() {
     setInterval(() => {
       if (!this.isPaused && this.index < this.data.length) {
-        this.addDanmu(this.data[this.index]);
+        // this.addDanmu(this.data[this.index]);
         this.index++;
       }
     }, 1000);

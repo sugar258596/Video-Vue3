@@ -35,7 +35,4 @@ export default defineConfig({
     // 静态资源目录
     assetsDir: "public",
   },
-  server: {
-    host: "192.168.0.1",
-  },
 });
